@@ -1,0 +1,2 @@
+Total column : datetime
+    =CountIf(ArrayFormula(D3:D<>""),TRUE)
