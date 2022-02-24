@@ -13,15 +13,12 @@
 #include "utility.h"
 #include "wifiMan.h"
 
-#define DOOR_BTN_PIN_01 15
-#define DOOR_BTN_PIN_02 2
-
-EasyButton btnReset(0);
+// EasyButton btnReset(0);
 EasyButton btnDoor_01(DOOR_BTN_PIN_01);
-EasyButton btnDoor_02(DOOR_BTN_PIN_02);
 hw_timer_t* watchdogTimer = NULL;
 auto timer = timer_create_default();  // create a timer with default settings
 int openTimeCounter = 0;
+bool taskComplete = false;
 
 void tokenStatusCallback(TokenInfo info) {
     oled.putString(".");
@@ -39,50 +36,24 @@ void onPressed() {
 }
 
 void door_01_onPressed() {
-    // Switch Button Activating
-    Serial.println("--------------------------------------");
-    Serial.println("Door - 01 Switch Activating");
     openTimeCounter++;
-    if (WiFi.status() == WL_CONNECTED) {
-        oled.setTextXY(5, 1);
-        oled.putString("Counter : " + String(openTimeCounter) + " times  ");
-        UpdateSheets();
-
-        oled.setTextXY(7, 1);
-        oled.putString(NowString());
-    }
-}
-
-void door_02_onPressed() {
-    // Switch Button Activating
     Serial.println("--------------------------------------");
-    Serial.println("Door - 02 Switch Activating");
-    openTimeCounter++;
+    Serial.println("Door Opener - 01 Switch Activating => " + String(openTimeCounter));
     if (WiFi.status() == WL_CONNECTED) {
-        oled.setTextXY(5, 1);
-        oled.putString("Counter : " + String(openTimeCounter) + " times  ");
-        UpdateSheets();
+        bool ready = GSheet.ready();
+        if (ready && !taskComplete) {
+            oled.setTextXY(5, 1);
+            oled.putString("Counter : " + String(openTimeCounter) + " times  ");
 
-        oled.setTextXY(7, 1);
-        oled.putString(NowString());
+            UpdateSheets();
+            oled.setTextXY(7, 1);
+            oled.putString(NowString());
+        }
     }
 }
 
-void interruptReboot() {
-    // Prevent reboot when firmware upgrading
-    if (firmwareUpgradeProgress == 0) {
-        ets_printf("reboot (Watch Dog)\n");
-        esp_restart();
-    }
-}
-
-void setupWatchDog() {
-    Serial.print("Setting timer in setup");
-    watchdogTimer = timerBegin(0, 80, true);
-    // timer 0 divisor 80
-    timerAlarmWrite(watchdogTimer, 10000000, false);  // 10 sec set time in uS must be fed within this time or reboot
-    timerAttachInterrupt(watchdogTimer, &interruptReboot, true);
-    timerAlarmEnable(watchdogTimer);  // enable interrupt
+void buttonISR() {
+    btnDoor_01.read();
 }
 
 void setup() {
@@ -97,14 +68,17 @@ void setup() {
 
     pinMode(LED_BUILTIN, OUTPUT);
 
-    btnReset.begin();
-    btnReset.onPressed(onPressed);
+    // btnReset.begin();
+    // btnReset.onPressed(onPressed);
 
     btnDoor_01.begin();
-    btnDoor_01.onPressed(door_01_onPressed);
+    // btnDoor_01.onPressed( door_01_onPressed);
+    btnDoor_01.onPressedFor(2000, door_01_onPressed);
 
-    btnDoor_02.begin();
-    btnDoor_02.onPressed(door_02_onPressed);
+    if (btnDoor_01.supportsInterrupt()) {
+        btnDoor_01.enableInterrupt(buttonISR);
+        Serial.println("Button will be used through interrupts");
+    }
 
     setup_Wifi();
     setupTimeZone();
@@ -150,9 +124,8 @@ void setup() {
 }
 
 void loop() {
-    btnReset.read();
+    // btnReset.read();
 
-    btnDoor_01.read();
-    btnDoor_02.read();
+    btnDoor_01.update();
     timer.tick();
 }

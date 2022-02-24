@@ -23,8 +23,6 @@ void UpdateSheets() {
     FirebaseJson valueRange;
 
     String currentDate = NowString();
-    Serial.println("Last updated :" + currentDate);
-
     String _date = getSplitValue(currentDate, ' ', 0);
     String _time = getSplitValue(currentDate, ' ', 1);
 
@@ -54,6 +52,7 @@ void UpdateSheets() {
     // Timestampt last update
     GSheet.values.batchUpdateByDataFilter(&response, GOOGLE_SPREADSHEET_ID, &dataFilterValueRangeArr);
     // response.toString(Serial, true);
+    Serial.println("Last updated :" + currentDate);
 }
 
 #endif
