@@ -13,8 +13,8 @@
 #include "utility.h"
 #include "wifiMan.h"
 
-// EasyButton btnReset(0);
-EasyButton btnDoor_01(DOOR_BTN_PIN_01);
+EasyButton btnReset(0);
+EasyButton btnDoor_01(DOOR_BTN_PIN_01, 35, false);
 hw_timer_t* watchdogTimer = NULL;
 auto timer = timer_create_default();  // create a timer with default settings
 int openTimeCounter = 0;
@@ -59,8 +59,6 @@ void buttonISR() {
 void setup() {
     Serial.begin(DEFAULT_BAUD_RATE);
 
-    pinMode(LED_BUILTIN, OUTPUT);
-
     // OLED Display
     InitialOLED();
 
@@ -68,17 +66,11 @@ void setup() {
 
     pinMode(LED_BUILTIN, OUTPUT);
 
-    // btnReset.begin();
-    // btnReset.onPressed(onPressed);
+    btnReset.begin();
+    btnReset.onPressed(onPressed);
 
     btnDoor_01.begin();
-    // btnDoor_01.onPressed( door_01_onPressed);
-    btnDoor_01.onPressedFor(2000, door_01_onPressed);
-
-    if (btnDoor_01.supportsInterrupt()) {
-        btnDoor_01.enableInterrupt(buttonISR);
-        Serial.println("Button will be used through interrupts");
-    }
+    btnDoor_01.onPressed(door_01_onPressed);
 
     setup_Wifi();
     setupTimeZone();
@@ -124,8 +116,7 @@ void setup() {
 }
 
 void loop() {
-    // btnReset.read();
-
-    btnDoor_01.update();
+    btnReset.read();
+    btnDoor_01.read();
     timer.tick();
 }

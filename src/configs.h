@@ -26,4 +26,5 @@
 
 const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----xxxxxxxxxxxxx\n-----END PRIVATE KEY-----\n";
 
+#define DOOR_BTN_PIN_01 15
 #endif

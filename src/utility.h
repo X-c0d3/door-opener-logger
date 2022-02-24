@@ -63,7 +63,9 @@ void setupTimeZone() {
 }
 
 bool ledActiveStatus(void*) {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    if (WiFi.status() == WL_CONNECTED) {
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    }
     return true;
 }
 
