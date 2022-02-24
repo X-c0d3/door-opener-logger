@@ -14,7 +14,7 @@
 #include "wifiMan.h"
 
 EasyButton btnReset(0);
-EasyButton btnDoor_01(DOOR_BTN_PIN_01, 35, false);
+EasyButton btnDoor_01(DOOR_BTN_PIN_01);
 hw_timer_t* watchdogTimer = NULL;
 auto timer = timer_create_default();  // create a timer with default settings
 int openTimeCounter = 0;
